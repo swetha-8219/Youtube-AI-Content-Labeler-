@@ -2,6 +2,8 @@
 
 **A browser extension that tells viewers whether a YouTube video is AI-generated, and shows the evidence.**
 
+![A video player with a red AI-generated badge and the evidence behind it](docs/social/hero.png)
+
 Many YouTube videos are now AI-generated, and viewers can't tell. People take false information from them as fact. YouTube's own AI label is easy to miss, and creators often don't disclose. Nobody can watermark someone else's upload, so this project puts a label on the **viewer's** side instead: a badge on every video's player.
 
 | Badge | Meaning |
@@ -115,6 +117,8 @@ We need **500+ public YouTube videos where we know for sure** whether they're AI
 - 🌍 **Non-English** videos, both AI and real.
 - 🎮 Animation, CGI and games. These are real, but easy to mistake for AI.
 - 🤖 AI videos with **proof**: the creator names the tool, or it's an official sample from an AI lab.
+
+![Help us label 500 videos](docs/social/help.png)
 
 **How to help:** open an issue with the **"Contribute labeled videos"** form and paste one line per video. No coding needed. Every video needs an evidence link: no guesses, and no detector scores.
 
