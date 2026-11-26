@@ -1,0 +1,9 @@
+{
+  "_note": "Launch thresholds from the spec's Safety review. Changing these needs the owner's sign-off.",
+  "red_precision_min": 0.995,
+  "amber_fpr_on_real_max": 0.02,
+  "amber_precision_min": 0.90,
+  "catch_rate_min": 0.60,
+  "fairness_fpr_ratio_max": 1.5,
+  "min_videos_per_group": 30
+}

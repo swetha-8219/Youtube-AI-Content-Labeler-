@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "AI Label Layer",
+  "version": "0.3.0",
+  "description": "Badges YouTube videos as AI-generated, Likely AI, or Unverified, with the evidence behind each verdict.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://www.youtube.com/*", "http://localhost:8787/*", "http://127.0.0.1:8787/*"],
+  "background": { "service_worker": "src/background.js" },
+  "options_page": "src/options.html",
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/verdict.js", "src/content.js"],
+      "css": ["src/badge.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

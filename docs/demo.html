@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Label Layer — Demo</title>
+<style>
+  :root { --bg:#0f0f0f; --card:#1c1c1c; --ink:#f1f1f1; --quiet:#aaa; --line:#2e2e2e; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.45 Roboto, -apple-system, Segoe UI, Arial, sans-serif; }
+  header { padding:20px 16px 8px; max-width:880px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  header p { margin:0; color:var(--quiet); }
+  .legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; font-size:12px; color:var(--quiet); }
+  .legend span::before { content:""; display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:-1px; }
+  .lg-c::before { background:#c62828; } .lg-l::before { background:#e08a00; } .lg-u::before { background:#777; }
+  main { max-width:880px; margin:0 auto; padding:8px 16px 32px; display:grid; gap:20px; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); }
+  @media (max-width:440px){ main { grid-template-columns:1fr; } }
+  .video { background:var(--card); border-radius:12px; overflow:visible; }
+  .player { position:relative; aspect-ratio:16/9; border-radius:12px 12px 0 0; overflow:visible; }
+  .scene { position:absolute; inset:0; border-radius:12px 12px 0 0; overflow:hidden; }
+  .scene::after { content:"▶"; position:absolute; inset:0; display:grid; place-items:center; font-size:34px; color:rgba(255,255,255,.75); }
+  .s1 { background:linear-gradient(160deg,#ffb36b 0%,#e4572e 45%,#3a1c71 100%); }
+  .s2 { background:radial-gradient(circle at 30% 70%,#9be7ff 0,#2b6cb0 40%,#0b1e3f 100%); }
+  .s3 { background:linear-gradient(200deg,#e0f7e9 0%,#5fb37c 50%,#1d4d2f 100%); }
+  .s4 { background:linear-gradient(135deg,#444 0%,#888 50%,#2a2a2a 100%); }
+  .meta { padding:10px 12px 12px; }
+  .title { font-weight:600; font-size:15px; }
+  .chan { color:var(--quiet); font-size:12px; margin-top:2px; }
+  .ytlabel { display:inline-block; margin-top:8px; font-size:11px; color:#ddd; background:#333; padding:3px 8px; border-radius:6px; }
+  .note { max-width:880px; margin:0 auto; padding:0 16px 8px; color:var(--quiet); font-size:12px; }
+
+  /* Signal lab */
+  .lab { max-width:880px; margin:0 auto 300px; padding:0 16px; }
+  .lab-card { background:var(--card); border-radius:12px; padding:16px; }
+  .lab h2 { font-size:16px; margin:0 0 4px; }
+  .lab p { margin:0 0 12px; color:var(--quiet); font-size:13px; }
+  .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--line); gap:12px; }
+  .row label { flex:1; }
+  .row small { display:block; color:var(--quiet); font-size:11.5px; }
+  input[type=range] { width:140px; }
+  .val { width:42px; text-align:right; font-variant-numeric:tabular-nums; }
+  .lab .player { margin-top:14px; border-radius:12px; }
+  .lab .scene { border-radius:12px; }
+
+  /* Badge styles from the extension (src/badge.css) */
+  .ail-badge {
+  position: absolute; top: 12px; left: 12px; z-index: 60;
+  font: 600 13px/1.2 Roboto, Arial, sans-serif;
+}
+.ail-pill {
+  border: 0; border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.ail-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .9; }
+.ail-confirmed .ail-pill { background: #c62828; }
+.ail-likely .ail-pill { background: #e08a00; color: #1a1a1a; }
+.ail-unverified .ail-pill { background: rgba(60,60,60,.85); }
+
+.ail-panel {
+  margin-top: 8px; width: 290px; background: #fff; color: #1a1a1a;
+  border-radius: 10px; padding: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.35);
+  font-weight: 400;
+}
+.ail-why { font-size: 13px; margin-bottom: 8px; line-height: 1.35; }
+.ail-panel ul { list-style: none; margin: 0 0 10px; padding: 0; }
+.ail-panel li {
+  display: flex; justify-content: space-between; gap: 8px;
+  font-size: 12px; padding: 5px 0; border-top: 1px solid #eee; color: #666;
+}
+.ail-panel li b { font-weight: 600; color: #444; text-align: right; }
+.ail-panel li.ail-hit b { color: #c62828; }
+.ail-mock {
+  font-size: 11px; color: #8a5a00; background: #fff6e0; border-radius: 6px;
+  padding: 6px 8px; margin-bottom: 8px; line-height: 1.35;
+}
+.ail-report {
+  width: 100%; border: 1px solid #ccc; background: #f7f7f7; border-radius: 8px;
+  padding: 7px; cursor: pointer; font: 500 12px Roboto, Arial, sans-serif;
+}
+.ail-report:disabled { opacity: .6; cursor: default; }
+
+  .ail-panel { max-width: calc(100vw - 56px); }
+</style>
+</head>
+<body>
+<header>
+  <h1>AI Label Layer: prototype demo</h1>
+  <p>How the extension badges videos. Tap a badge to see the evidence behind it.</p>
+  <div class="legend"><span class="lg-c">AI-generated: proof found</span><span class="lg-l">Likely AI: estimate</span><span class="lg-u">Unverified: no signals</span></div>
+</header>
+
+<main id="feed"></main>
+<div class="note">Videos and channels are fictional. The verdict rules are the same code the extension runs (src/verdict.js).</div>
+
+<section class="lab">
+  <div class="lab-card">
+    <h2>Signal lab</h2>
+    <p>Change the signals and watch the verdict update.</p>
+    <div class="row"><label for="l-yt">YouTube AI label on page<small>Creator disclosed, or YouTube auto-detected</small></label><input type="checkbox" id="l-yt"></div>
+    <div class="row"><label for="l-c2pa">C2PA says AI-generated<small>Signed content credentials</small></label><input type="checkbox" id="l-c2pa"></div>
+    <div class="row"><label for="l-synth">SynthID watermark detected<small>Google, OpenAI, Nvidia, Kakao models</small></label><input type="checkbox" id="l-synth"></div>
+    <div class="row"><label for="l-cls">Classifier score<small>Estimate, not proof</small></label><input type="range" id="l-cls" min="0" max="100" value="40"><span class="val" id="v-cls">40%</span></div>
+    <div class="row"><label for="l-crowd">Crowd reports<small>25+ backs up a 60%+ score</small></label><input type="range" id="l-crowd" min="0" max="60" value="5"><span class="val" id="v-crowd">5</span></div>
+    <div class="player" id="lab-player"><div class="scene s4"></div></div>
+  </div>
+</section>
+
+<script>
+// Verdict engine: turns signals into one of three verdicts.
+// There is deliberately no "Real" verdict: absence of signals proves nothing.
+// Any signal that is null/undefined was NOT checked and is shown as "Not checked".
+(function (root) {
+  const THRESHOLDS = {
+    classifierLikely: 0.8,     // classifier alone
+    classifierWithCrowd: 0.6,  // classifier + crowd
+    crowdMin: 25               // reports needed to support a 0.6+ score
+  };
+
+  const NOT_CHECKED = "Not checked";
+
+  /**
+   * @param {object} s
+   * @param {boolean} s.youtubeLabel      YouTube's AI label found on the page
+   * @param {boolean|null} s.youtubeApi   containsSyntheticMedia from the YouTube Data API
+   * @param {boolean|null} s.c2paAI       C2PA manifest declares AI generation
+   * @param {boolean|null} s.synthid      SynthID watermark detected
+   * @param {number|null} s.classifier    0..1 likelihood from an AI-media classifier
+   * @param {number|null} s.crowdReports  "This is AI" reports from users
+   */
+  function computeVerdict(s) {
+    const ytHit = !!s.youtubeLabel || s.youtubeApi === true;
+    const ytResult = s.youtubeLabel ? "Found on page"
+      : s.youtubeApi === true ? "Disclosed (YouTube API)"
+      : s.youtubeApi === false ? "Not disclosed"
+      : "Not found on page";
+    const c = typeof s.classifier === "number" ? s.classifier : null;
+    const crowd = typeof s.crowdReports === "number" ? s.crowdReports : null;
+
+    const evidence = [
+      { name: "YouTube AI label", result: ytResult, hit: ytHit, kind: "proof" },
+      { name: "C2PA content credentials",
+        result: s.c2paAI === true ? "Says AI-generated" : s.c2paAI === false ? "No AI declared" : NOT_CHECKED,
+        hit: s.c2paAI === true, kind: "proof" },
+      { name: "SynthID watermark",
+        result: s.synthid === true ? "Detected" : s.synthid === false ? "Not detected" : NOT_CHECKED,
+        hit: s.synthid === true, kind: "proof" },
+      { name: "AI classifier",
+        result: c == null ? NOT_CHECKED : Math.round(c * 100) + "% likely AI",
+        hit: c != null && c >= THRESHOLDS.classifierWithCrowd, kind: "estimate" },
+      { name: "Crowd reports",
+        result: crowd == null ? NOT_CHECKED : crowd + " reports",
+        hit: crowd != null && crowd >= THRESHOLDS.crowdMin, kind: "estimate" }
+    ];
+
+    if (ytHit || s.c2paAI === true || s.synthid === true) {
+      return { level: "confirmed", label: "AI-generated", evidence,
+        why: "A provenance signal confirms this video was made or altered with AI." };
+    }
+    if (c != null && (c >= THRESHOLDS.classifierLikely ||
+        (c >= THRESHOLDS.classifierWithCrowd && (crowd || 0) >= THRESHOLDS.crowdMin))) {
+      return { level: "likely", label: "Likely AI · " + Math.round(c * 100) + "%", evidence,
+        why: "No watermark found, but our classifier estimates this is AI. This is an estimate, not proof." };
+    }
+    return { level: "unverified", label: "Unverified", evidence,
+      why: "No AI signals found. This does not mean the video is real." };
+  }
+
+  root.AILabel = Object.assign(root.AILabel || {}, { computeVerdict, THRESHOLDS });
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+(function () {
+  const { computeVerdict } = window.AILabel;
+
+  const videos = [
+    { id:"v1", scene:"s1", title:"Sunset over a city that doesn't exist", chan:"Dreamscape Studio · 1.2M views", ytLabel:true,
+      signals:{ youtubeLabel:true, c2paAI:null, synthid:false, classifier:0.91, crowdReports:12 } },
+    { id:"v2", scene:"s2", title:"Breaking: storm footage from the coast", chan:"QuickNews Daily · 480K views",
+      signals:{ youtubeLabel:false, c2paAI:null, synthid:true, classifier:0.72, crowdReports:41 } },
+    { id:"v3", scene:"s3", title:"Doctor explains the one food to avoid", chan:"Health Facts Now · 2.3M views",
+      signals:{ youtubeLabel:false, c2paAI:null, synthid:false, classifier:0.88, crowdReports:9 } },
+    { id:"v4", scene:"s4", title:"Fixing a leaky faucet in 5 minutes", chan:"Home Repair Hub · 95K views",
+      signals:{ youtubeLabel:false, c2paAI:null, synthid:false, classifier:0.12, crowdReports:0 } }
+  ];
+
+  // Same rendering as the extension's content.js, minus YouTube page plumbing.
+  function renderBadge(player, verdict, videoId) {
+    let badge = player.querySelector(".ail-badge");
+    if (!badge) { badge = document.createElement("div"); player.appendChild(badge); }
+    const wasOpen = badge.querySelector(".ail-panel") && !badge.querySelector(".ail-panel").hidden;
+    badge.className = "ail-badge ail-" + verdict.level;
+    badge.innerHTML = "";
+    const pill = document.createElement("button");
+    pill.className = "ail-pill"; pill.textContent = verdict.label; pill.title = verdict.why;
+    badge.appendChild(pill);
+    const panel = document.createElement("div");
+    panel.className = "ail-panel"; panel.hidden = !wasOpen;
+    const h = document.createElement("div"); h.className = "ail-why"; h.textContent = verdict.why; panel.appendChild(h);
+    const list = document.createElement("ul");
+    for (const e of verdict.evidence) {
+      const li = document.createElement("li"); if (e.hit) li.className = "ail-hit";
+      const a = document.createElement("span"); a.textContent = e.name;
+      const b = document.createElement("b"); b.textContent = e.result;
+      li.append(a, b); list.appendChild(li);
+    }
+    panel.appendChild(list);
+    const rep = document.createElement("button"); rep.className = "ail-report"; rep.textContent = "I think this is AI";
+    rep.onclick = (ev) => { ev.stopPropagation(); rep.textContent = "Thanks, reported"; rep.disabled = true; };
+    panel.appendChild(rep);
+    badge.appendChild(panel);
+    pill.onclick = (ev) => {
+      ev.stopPropagation();
+      document.querySelectorAll(".ail-panel").forEach(p => { if (p !== panel) p.hidden = true; });
+      panel.hidden = !panel.hidden;
+    };
+  }
+  document.addEventListener("click", () => document.querySelectorAll(".ail-panel").forEach(p => p.hidden = true));
+
+  const feed = document.getElementById("feed");
+  for (const v of videos) {
+    const card = document.createElement("article"); card.className = "video";
+    card.innerHTML = `<div class="player"><div class="scene ${v.scene}"></div></div><div class="meta"><div class="title"></div><div class="chan"></div></div>`;
+    card.querySelector(".title").textContent = v.title;
+    card.querySelector(".chan").textContent = v.chan;
+    if (v.ytLabel) { const t = document.createElement("div"); t.className = "ytlabel"; t.textContent = "Altered or synthetic content"; card.querySelector(".meta").appendChild(t); }
+    feed.appendChild(card);
+    const player = card.querySelector(".player");
+    // Instant verdict from the page, then "backend" result after a short delay, as in the extension.
+    renderBadge(player, computeVerdict({ youtubeLabel: v.signals.youtubeLabel, c2paAI:null, synthid:false, classifier:null, crowdReports:0 }), v.id);
+    setTimeout(() => renderBadge(player, computeVerdict(v.signals), v.id), 500 + Math.random() * 600);
+  }
+
+  // Signal lab
+  const $ = id => document.getElementById(id);
+  const labPlayer = $("lab-player");
+  function lab() {
+    $("v-cls").textContent = $("l-cls").value + "%";
+    $("v-crowd").textContent = $("l-crowd").value;
+    renderBadge(labPlayer, computeVerdict({
+      youtubeLabel: $("l-yt").checked, c2paAI: $("l-c2pa").checked || null, synthid: $("l-synth").checked,
+      classifier: $("l-cls").value / 100, crowdReports: +$("l-crowd").value
+    }), "lab");
+  }
+  ["l-yt","l-c2pa","l-synth","l-cls","l-crowd"].forEach(id => $(id).addEventListener("input", lab));
+  lab();
+})();
+</script>
+</body>
+</html>

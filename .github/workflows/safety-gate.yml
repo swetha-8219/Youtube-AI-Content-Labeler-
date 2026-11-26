@@ -1,0 +1,33 @@
+# Safety gate: blocks merges that break tests or miss the launch thresholds.
+name: safety-gate
+on: [push, pull_request]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      - name: Validate community-labeled videos
+        run: node evals/validate_dataset.mjs
+
+      - name: Backend unit tests
+        run: cd backend && python -m unittest -v test_backend
+
+      - name: Harness self-test (clean fixture must pass)
+        run: node evals/run_eval.mjs --dataset evals/fixtures/clean_dataset.csv --signals evals/fixtures/clean_signals.jsonl
+
+      - name: Harness self-test (biased fixture must FAIL)
+        run: |
+          if node evals/run_eval.mjs --dataset evals/fixtures/biased_dataset.csv --signals evals/fixtures/biased_signals.jsonl; then
+            echo "Gate failed to catch planted bias"; exit 1
+          fi
+
+      # Real launch gate. Runs once a labeled set and cached signals are committed.
+      - name: Launch gate on real labeled data
+        if: hashFiles('evals/dataset.csv', 'evals/signals.jsonl') != ''
+        run: node evals/run_eval.mjs --dataset evals/dataset.csv --signals evals/signals.jsonl

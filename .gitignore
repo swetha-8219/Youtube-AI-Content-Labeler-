@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.db
+.env
+evals/signals.jsonl
+node_modules/
+.DS_Store

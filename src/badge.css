@@ -1,0 +1,38 @@
+.ail-badge {
+  position: absolute; top: 12px; left: 12px; z-index: 60;
+  font: 600 13px/1.2 Roboto, Arial, sans-serif;
+}
+.ail-pill {
+  border: 0; border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.ail-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .9; }
+.ail-confirmed .ail-pill { background: #c62828; }
+.ail-likely .ail-pill { background: #e08a00; color: #1a1a1a; }
+.ail-unverified .ail-pill { background: rgba(60,60,60,.85); }
+
+.ail-panel {
+  margin-top: 8px; width: 290px; background: #fff; color: #1a1a1a;
+  border-radius: 10px; padding: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.35);
+  font-weight: 400;
+}
+.ail-why { font-size: 13px; margin-bottom: 8px; line-height: 1.35; }
+.ail-panel ul { list-style: none; margin: 0 0 10px; padding: 0; }
+.ail-panel li {
+  display: flex; justify-content: space-between; gap: 8px;
+  font-size: 12px; padding: 5px 0; border-top: 1px solid #eee; color: #666;
+}
+.ail-panel li b { font-weight: 600; color: #444; text-align: right; }
+.ail-panel li.ail-hit b { color: #c62828; }
+.ail-mock {
+  font-size: 11px; color: #8a5a00; background: #fff6e0; border-radius: 6px;
+  padding: 6px 8px; margin-bottom: 8px; line-height: 1.35;
+}
+.ail-report {
+  width: 100%; border: 1px solid #ccc; background: #f7f7f7; border-radius: 8px;
+  padding: 7px; cursor: pointer; font: 500 12px Roboto, Arial, sans-serif;
+}
+.ail-actions { display: flex; gap: 6px; }
+.ail-actions .ail-report { flex: 1; }
+.ail-report:disabled { opacity: .6; cursor: default; }
