@@ -155,3 +155,7 @@ Even 10 well-sourced videos help. Contributors are credited in the release notes
 ## Contributing code
 
 Issues and PRs are welcome. Please keep every PR green on the safety gate, and add a test for any change to verdict rules or signals. A confirmed wrong label should become a permanent eval case.
+
+## License
+
+[MIT](LICENSE). Contributions, including labeled-video submissions, are accepted under the same license.
